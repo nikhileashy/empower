@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNO ATTOLLITE // Lifting Oceans And Moving Mountains</title>
+    
+    <!-- Google Fonts: Inter & Space Grotesk & JetBrains Mono for minimal monochrome engineering aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP & ScrollTrigger & Lenis Smooth Scroll -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        amoled: '#000000',
+                        carbon: '#080808',
+                        mono: {
+                            white: '#FFFFFF',
+                            silver: '#A1A1AA',
+                            zinc: '#52525B',
+                            border: '#1F1F22'
+                        }
+                    },
+                    fontFamily: {
+                        display: ['Space Grotesk', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            background-color: #000000;
+            color: #FFFFFF;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        ::selection {
+            background: #FFFFFF;
+            color: #000000;
+        }
+
+        /* Lenis Smooth Scroll Setup */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+
+        /* Minimal Glass Card for AMOLED */
+        .mono-card {
+            background: rgba(8, 8, 8, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(16px);
+            transition: border-color 0.4s ease, transform 0.4s ease;
+        }
+
+        .mono-card:hover {
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        /* Transparent PNG Cutout Styling */
+        .png-cutout-wrapper {
+            position: relative;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .png-cutout-mask {
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 78%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 78%, rgba(0,0,0,0) 100%);
+        }
+
+        .png-backlight {
+            background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.04) 45%, rgba(0, 0, 0, 0) 70%);
+        }
+
+        /* Subtle architectural grid lines */
+        .bg-mono-grid {
+            background-size: 64px 64px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+
+        /* Minimal Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #000000;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3F3F46;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="bg-amoled text-white antialiased selection:bg-white selection:text-black">
+
+    <!-- Fixed Minimal Progress Line -->
+    <div class="fixed top-0 left-0 w-full h-[2px] z-50 bg-zinc-950">
+        <div id="scroll-progress" class="h-full w-0 bg-white"></div>
+    </div>
+
+    <!-- Fixed Minimal Header -->
+    <header class="fixed top-0 left-0 w-full z-40 px-4 sm:px-8 lg:px-12 py-5 flex items-center justify-between bg-gradient-to-b from-black via-black/80 to-transparent backdrop-blur-xs">
+        <a href="#hero" class="flex items-center gap-3.5 group">
+            <div class="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center bg-black overflow-hidden p-1 group-hover:border-white/50 transition-all duration-300">
+                <img 
+                    src="https://i.ibb.co/ZRKMBR9h/file-000000002ffc82089dd4b632ecd2f969.png" 
+                    alt="UNO ATTOLLITE Logo" 
+                    class="w-full h-full object-contain"
+                >
+            </div>
+            <div class="flex flex-col">
+                <span class="font-display tracking-[0.18em] text-xs sm:text-sm font-bold text-white uppercase">UNO ATTOLLITE</span>
+            </div>
+        </a>
+
+        <!-- Minimal Chapter Index Navigation -->
+        <nav class="hidden xl:flex items-center gap-1 p-1 rounded-full border border-white/10 bg-black/90">
+            <button onclick="scrollToSection('#hero')" class="nav-pill px-3 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase transition-all bg-white text-black" data-target="hero">00</button>
+            <button onclick="scrollToSection('#member-1')" class="nav-pill px-3 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-1">01.Bimi</button>
+            <button onclick="scrollToSection('#member-2')" class="nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-2">02.Ann</button>
+            <button onclick="scrollToSection('#member-3')" class="nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-3">03.Nikhil</button>
+            <button onclick="scrollToSection('#member-4')" class="nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-4">04.Allen</button>
+            <button onclick="scrollToSection('#member-5')" class="nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-5">05.Akshara</button>
+            <button onclick="scrollToSection('#member-6')" class="nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-6">06.Lakshmi</button>
+            <button onclick="scrollToSection('#member-7')" class="nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all" data-target="member-7">07.Sreedev</button>
+        </nav>
+
+        <!-- Minimal Status Indicator -->
+        <div class="flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-black/80">
+            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+            <span class="font-mono text-[10px] tracking-widest uppercase text-zinc-400">7 Members</span>
+        </div>
+    </header>
+
+    <main class="relative z-10 bg-mono-grid">
+
+        <!-- ==========================================
+             00. HERO PARALLAX SECTION
+        =========================================== -->
+        <section id="hero" class="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden px-4 py-24 border-b border-white/10">
+            
+            <div class="absolute w-[24rem] h-[24rem] sm:w-[38rem] sm:h-[38rem] rounded-full bg-white/[0.04] blur-[130px] pointer-events-none"></div>
+
+            <div id="hero-watermark" class="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+                <span class="font-display font-bold text-[16vw] leading-none text-white/[0.025] tracking-tighter uppercase whitespace-nowrap">
+                    ATTOLLITE
+                </span>
+            </div>
+
+            <div class="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
+                
+                <div id="hero-logo" class="relative w-32 h-32 sm:w-44 sm:h-44 mb-8 flex items-center justify-center">
+                    <div class="absolute inset-0 rounded-full bg-white/[0.06] blur-2xl pointer-events-none"></div>
+                    <img 
+                        src="https://i.ibb.co/ZRKMBR9h/file-000000002ffc82089dd4b632ecd2f969.png" 
+                        alt="UNO ATTOLLITE Emblem" 
+                        class="w-full h-full object-contain relative z-10 drop-shadow-[0_10px_25px_rgba(255,255,255,0.12)]"
+                    >
+                </div>
+
+                <h1 id="hero-title" class="font-display font-bold text-4xl sm:text-7xl md:text-8xl lg:text-9xl tracking-[-0.03em] text-white leading-none mb-6 uppercase">
+                    UNO ATTOLLITE
+                </h1>
+
+                <div id="hero-divider" class="w-24 h-[1px] bg-white/30 my-4"></div>
+
+                <h2 id="hero-slogan" class="max-w-2xl mx-auto text-lg sm:text-2xl md:text-3xl font-light text-zinc-300 tracking-wide leading-relaxed mt-3 px-2 font-display">
+                    Lifting Oceans And Moving Mountains
+                </h2>
+
+                <button onclick="scrollToSection('#story-intro')" class="mt-16 group flex flex-col items-center gap-3 text-zinc-500 hover:text-white transition-colors">
+                    <span class="font-mono text-[10px] tracking-[0.3em] uppercase">Scroll</span>
+                    <div class="w-[1px] h-12 bg-gradient-to-b from-white to-transparent"></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             NARRATIVE BRIDGE
+        =========================================== -->
+        <section id="story-intro" class="relative py-28 sm:py-36 px-4 sm:px-8 border-b border-white/10 bg-amoled overflow-hidden">
+            <div class="max-w-4xl mx-auto text-left sm:text-center relative z-10">
+                <p id="scrub-quote" class="font-display text-2xl sm:text-4xl md:text-5xl font-medium leading-tight tracking-tight text-zinc-800">
+                    <span class="scrub-word">Unrelenting</span>
+                    <span class="scrub-word">force</span>
+                    <span class="scrub-word">meets</span>
+                    <span class="scrub-word">quiet</span>
+                    <span class="scrub-word">precision.</span>
+                    <span class="scrub-word">We</span>
+                    <span class="scrub-word">stand</span>
+                    <span class="scrub-word">united</span>
+                    <span class="scrub-word">as</span>
+                    <span class="scrub-word">one</span>
+                    <span class="scrub-word">collective—</span>
+                    <span class="scrub-word">lifting</span>
+                    <span class="scrub-word">oceans,</span>
+                    <span class="scrub-word">moving</span>
+                    <span class="scrub-word">mountains,</span>
+                    <span class="scrub-word">and</span>
+                    <span class="scrub-word">redefining</span>
+                    <span class="scrub-word">the</span>
+                    <span class="scrub-word">impossible.</span>
+                </p>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             01. BIMI GIJO (CAPTAIN)
+        =========================================== -->
+        <section id="member-1" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="left">
+            <div class="parallax-bg-numeral absolute right-4 sm:right-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                01
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-start -ml-4 sm:-ml-6 lg:-ml-8 relative shrink-0">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.ibb.co/TM2kwkBp/bimi.png" 
+                            alt="Bimi Gijo" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-left-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">01 // CAPTAIN</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] bg-white text-black font-semibold uppercase tracking-wider">
+                                    Captain
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Bimi Gijo
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                Captain &bull; UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Leading UNO ATTOLLITE from the front, Bimi steers the collective with clarity, resolve, and unshakeable determination—uniting every strength to lift oceans and move mountains.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             02. ANN MARIYA VARGHESE (VICE CAPTAIN)
+        =========================================== -->
+        <section id="member-2" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="right">
+            <div class="parallax-bg-numeral absolute left-4 sm:left-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                02
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper order-1 lg:order-2 w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-end -mr-4 sm:-mr-6 lg:-mr-8 relative shrink-0 self-end lg:self-center">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.supaimg.com/0a7eee48-aefa-425a-b403-fe68fa9eaf30/4442491b-5af0-4096-87d0-fc1871102e16.png" 
+                            alt="Ann Mariya Varghese" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-right-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="order-2 lg:order-1 w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">02 // VICE CAPTAIN</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] border border-white/30 text-white uppercase tracking-wider">
+                                    Vice Captain
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Ann Mariya Varghese
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                Vice Captain &bull; UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Bringing strategic oversight and dedicated execution, Ann ensures seamless coordination across all endeavors of the collective.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             03. NIKHIL EASHY P
+        =========================================== -->
+        <section id="member-3" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="left">
+            <div class="parallax-bg-numeral absolute right-4 sm:right-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                03
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-start -ml-4 sm:-ml-6 lg:-ml-8 relative shrink-0">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.supaimg.com/0a7eee48-aefa-425a-b403-fe68fa9eaf30/56a2b29d-dbb4-4910-a362-504f580cae22.png" 
+                            alt="Nikhil Eashy P" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-left-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">03 // MEMBER</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] border border-white/30 text-white uppercase tracking-wider">
+                                    UNO ATTOLLITE
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Nikhil Eashy P
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Anchoring the foundational spirit of UNO ATTOLLITE, Nikhil brings focused execution and relentless drive, turning ambitious ideas into grounded reality.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             04. ALLEN JOHN JOY
+        =========================================== -->
+        <section id="member-4" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="right">
+            <div class="parallax-bg-numeral absolute left-4 sm:left-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                04
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper order-1 lg:order-2 w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-end -mr-4 sm:-mr-6 lg:-mr-8 relative shrink-0 self-end lg:self-center">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.ibb.co/fYqSrr78/IMG-1814.png" 
+                            alt="Allen John Joy" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-right-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="order-2 lg:order-1 w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">04 // MEMBER</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] border border-white/30 text-white uppercase tracking-wider">
+                                    UNO ATTOLLITE
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Allen John Joy
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Driven by resilience and sharp problem-solving, Allen strengthens the core of the team and pushes every challenge toward a decisive breakthrough.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             05. AKSHARA A
+        =========================================== -->
+        <section id="member-5" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="left">
+            <div class="parallax-bg-numeral absolute right-4 sm:right-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                05
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-start -ml-4 sm:-ml-6 lg:-ml-8 relative shrink-0">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.supaimg.com/0a7eee48-aefa-425a-b403-fe68fa9eaf30/af20348a-6cd0-424c-b707-b05e71e8702f.png" 
+                            alt="Akshara A" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-left-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">05 // MEMBER</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] border border-white/30 text-white uppercase tracking-wider">
+                                    UNO ATTOLLITE
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Akshara A
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Combining creativity with composed precision, Akshara elevates every initiative with thoughtful perspective and unwavering commitment to excellence.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             06. LAKSHMI KRISHNA K K
+        =========================================== -->
+        <section id="member-6" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="right">
+            <div class="parallax-bg-numeral absolute left-4 sm:left-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                06
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper order-1 lg:order-2 w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-end -mr-4 sm:-mr-6 lg:-mr-8 relative shrink-0 self-end lg:self-center">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.supaimg.com/0a7eee48-aefa-425a-b403-fe68fa9eaf30/560bdad7-e169-45dd-adcb-e489e0bdf950.png" 
+                            alt="Lakshmi Krishna K K" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-right-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="order-2 lg:order-1 w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">06 // MEMBER</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] border border-white/30 text-white uppercase tracking-wider">
+                                    UNO ATTOLLITE
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Lakshmi Krishna K K
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Bringing dedication and seamless synergy to the collective, Lakshmi ensures every goal is met with grace, energy, and steadfast purpose.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             07. SREEDEV KAILAS
+        =========================================== -->
+        <section id="member-7" class="member-section relative min-h-screen w-full flex items-center overflow-hidden py-16 sm:py-24 lg:py-28 border-b border-white/10" data-side="left">
+            <div class="parallax-bg-numeral absolute right-4 sm:right-12 top-6 sm:top-12 font-display font-bold text-[7rem] sm:text-[16rem] lg:text-[20rem] leading-none text-white/[0.03] select-none pointer-events-none">
+                07
+            </div>
+
+            <div class="w-full max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 relative z-20">
+                <div class="flex flex-col lg:flex-row items-start lg:items-center gap-6 sm:gap-8 lg:gap-12">
+                    
+                    <div class="member-png-cutout png-cutout-wrapper w-full lg:w-[44%] h-[360px] sm:h-[460px] lg:h-[640px] flex items-end justify-start -ml-4 sm:-ml-6 lg:-ml-8 relative shrink-0">
+                        <div class="png-backlight absolute inset-0 pointer-events-none"></div>
+                        <img 
+                            src="https://i.supaimg.com/0a7eee48-aefa-425a-b403-fe68fa9eaf30/7d3d1c83-5187-4271-9609-f6adb4599f79.png" 
+                            alt="Sreedev Kailas" 
+                            class="parallax-png png-cutout-mask h-full w-auto max-w-[90%] sm:max-w-full object-contain object-left-bottom grayscale contrast-125 brightness-95 drop-shadow-[0_15px_35px_rgba(255,255,255,0.08)]"
+                        >
+                    </div>
+
+                    <div class="w-full lg:w-[52%] flex justify-start">
+                        <div class="member-desc-card mono-card rounded-2xl p-6 sm:p-8 lg:p-10 text-left w-full max-w-xl">
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3.5 mb-5">
+                                <span class="font-mono text-[11px] text-zinc-400 tracking-widest uppercase">07 // MEMBER</span>
+                                <span class="px-3 py-1 rounded-full font-mono text-[10px] border border-white/30 text-white uppercase tracking-wider">
+                                    UNO ATTOLLITE
+                                </span>
+                            </div>
+
+                            <h3 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                Sreedev Kailas
+                            </h3>
+                            <p class="font-mono text-[11px] sm:text-xs text-zinc-400 uppercase tracking-widest mb-5 sm:mb-6">
+                                UNO ATTOLLITE
+                            </p>
+
+                            <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
+                                Empowering the team with technical depth and creative vision, Sreedev helps propel UNO ATTOLLITE toward unprecedented milestones.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================
+             EPILOGUE: MINIMAL FOOTER
+        =========================================== -->
+        <section class="relative py-28 px-4 sm:px-8 bg-amoled overflow-hidden">
+            <div class="max-w-4xl mx-auto text-center relative z-10 flex flex-col items-center">
+                <div class="w-20 h-20 mb-6 flex items-center justify-center">
+                    <img 
+                        src="https://i.ibb.co/ZRKMBR9h/file-000000002ffc82089dd4b632ecd2f969.png" 
+                        alt="UNO ATTOLLITE Logo" 
+                        class="w-full h-full object-contain"
+                    >
+                </div>
+                <h2 class="font-display text-3xl sm:text-5xl font-bold text-white tracking-tight mb-3 uppercase">
+                    UNO ATTOLLITE
+                </h2>
+                <p class="text-zinc-400 text-sm sm:text-lg max-w-xl mx-auto leading-relaxed mb-10 font-light">
+                    Lifting Oceans And Moving Mountains
+                </p>
+
+                <button onclick="scrollToSection('#hero')" class="px-8 py-3.5 rounded-full border border-white/20 bg-black text-white font-mono text-xs tracking-widest uppercase hover:bg-white hover:text-black transition-all duration-300">
+                    Back to Top
+                </button>
+
+                <p class="mt-16 font-mono text-[11px] text-zinc-600 tracking-widest uppercase">
+                    &copy; UNO ATTOLLITE
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // ==========================================
+        // 1. INITIALIZE LENIS SMOOTH SCROLL + GSAP
+        // ==========================================
+        gsap.registerPlugin(ScrollTrigger);
+
+        let lenis;
+        try {
+            lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smoothWheel: true
+            });
+
+            lenis.on('scroll', ScrollTrigger.update);
+
+            gsap.ticker.add((time) => {
+                lenis.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
+        } catch (err) {
+            console.warn("Lenis fallback to native scroll:", err);
+        }
+
+        window.scrollToSection = function(selector) {
+            const target = document.querySelector(selector);
+            if (!target) return;
+            if (lenis) {
+                lenis.scrollTo(target, { offset: 0, duration: 1.4 });
+            } else {
+                target.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        // ==========================================
+        // 2. GSAP PARALLAX STORY CHOREOGRAPHY
+        // ==========================================
+        window.addEventListener('DOMContentLoaded', () => {
+
+            // Progress Bar
+            gsap.to('#scroll-progress', {
+                width: '100%',
+                ease: 'none',
+                scrollTrigger: {
+                    trigger: document.body,
+                    start: 'top top',
+                    end: 'bottom bottom',
+                    scrub: 0.15
+                }
+            });
+
+            // Hero Parallax Layers
+            const heroTl = gsap.timeline({
+                scrollTrigger: {
+                    trigger: '#hero',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+
+            heroTl
+                .to('#hero-watermark', { yPercent: 40, scale: 1.1, opacity: 0, ease: 'none' }, 0)
+                .to('#hero-logo', { yPercent: -35, scale: 0.9, opacity: 0, ease: 'none' }, 0)
+                .to('#hero-title', { yPercent: -50, opacity: 0.1, ease: 'none' }, 0)
+                .to('#hero-slogan', { yPercent: -80, opacity: 0, ease: 'none' }, 0);
+
+            // Word-by-word Monochrome Scrub Reveal
+            const scrubWords = gsap.utils.toArray('.scrub-word');
+            gsap.fromTo(scrubWords, 
+                { opacity: 0.15, color: '#27272A' },
+                {
+                    opacity: 1,
+                    color: '#FFFFFF',
+                    stagger: 0.08,
+                    scrollTrigger: {
+                        trigger: '#story-intro',
+                        start: 'top 78%',
+                        end: 'bottom 45%',
+                        scrub: true
+                    }
+                }
+            );
+
+            // Member Chapters Choreography
+            const memberSections = gsap.utils.toArray('.member-section');
+
+            memberSections.forEach((section) => {
+                const side = section.getAttribute('data-side'); // 'left' or 'right'
+                const cutoutWrapper = section.querySelector('.member-png-cutout');
+                const pngImg = section.querySelector('.parallax-png');
+                const descCard = section.querySelector('.member-desc-card');
+                const bgNumeral = section.querySelector('.parallax-bg-numeral');
+
+                if (cutoutWrapper) {
+                    gsap.fromTo(cutoutWrapper,
+                        { 
+                            opacity: 0, 
+                            x: side === 'left' ? -60 : 60 
+                        },
+                        {
+                            opacity: 1,
+                            x: 0,
+                            duration: 1.0,
+                            ease: 'power3.out',
+                            scrollTrigger: {
+                                trigger: section,
+                                start: 'top 82%',
+                                toggleActions: 'play none none reverse'
+                            }
+                        }
+                    );
+                }
+
+                if (pngImg) {
+                    gsap.fromTo(pngImg,
+                        { yPercent: 6, scale: 0.98 },
+                        {
+                            yPercent: -6,
+                            scale: 1.02,
+                            ease: 'none',
+                            scrollTrigger: {
+                                trigger: section,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: true
+                            }
+                        }
+                    );
+                }
+
+                if (descCard) {
+                    gsap.fromTo(descCard,
+                        { opacity: 0, x: -35, y: 35 },
+                        {
+                            opacity: 1,
+                            x: 0,
+                            y: 0,
+                            duration: 0.9,
+                            ease: 'power3.out',
+                            scrollTrigger: {
+                                trigger: section,
+                                start: 'top 78%',
+                                toggleActions: 'play none none reverse'
+                            }
+                        }
+                    );
+
+                    gsap.fromTo(descCard,
+                        { yPercent: 5 },
+                        {
+                            yPercent: -5,
+                            ease: 'none',
+                            scrollTrigger: {
+                                trigger: section,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: true
+                            }
+                        }
+                    );
+                }
+
+                if (bgNumeral) {
+                    gsap.fromTo(bgNumeral,
+                        { yPercent: -30 },
+                        {
+                            yPercent: 30,
+                            ease: 'none',
+                            scrollTrigger: {
+                                trigger: section,
+                                start: 'top bottom',
+                                end: 'bottom top',
+                                scrub: true
+                            }
+                        }
+                    );
+                }
+
+                ScrollTrigger.create({
+                    trigger: section,
+                    start: 'top center',
+                    end: 'bottom center',
+                    onEnter: () => setActiveNav(section.id),
+                    onEnterBack: () => setActiveNav(section.id)
+                });
+            });
+
+            ScrollTrigger.create({
+                trigger: '#hero',
+                start: 'top center',
+                end: 'bottom center',
+                onEnter: () => setActiveNav('hero'),
+                onEnterBack: () => setActiveNav('hero')
+            });
+        });
+
+        function setActiveNav(targetId) {
+            document.querySelectorAll('.nav-pill').forEach(btn => {
+                if (btn.getAttribute('data-target') === targetId) {
+                    btn.className = 'nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase transition-all bg-white text-black';
+                } else {
+                    btn.className = 'nav-pill px-3.5 py-1 rounded-full font-mono text-[10px] tracking-wider uppercase text-zinc-400 hover:text-white transition-all';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
